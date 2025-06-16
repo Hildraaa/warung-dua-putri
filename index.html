@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<title>Warung Dua Putri - Menu</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #fefcea 0%, #f1da36 100%);
+    color: #1f2937;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  h1, h2, h3, p { margin: 0; }
+  a { color: inherit; text-decoration: none; }
+
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px 100px;
+    flex: 1 0 auto;
+  }
+
+  header {
+    background: #f59e0b;
+    color: white;
+    padding: 20px 16px;
+    text-align: center;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  header h1 {
+    font-weight: 600;
+    font-size: 1.8rem;
+    letter-spacing: 1.2px;
+  }
+
+  .menu {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+    margin-top: 32px;
+  }
+  @media (min-width: 480px) {
+    .menu { grid-template-columns: 1fr 1fr; }
+  }
+
+  .dish-card {
+    background: rgba(255 255 255 / 0.9);
+    border-radius: 14px;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .dish-card:hover,
+  .dish-card:focus-within {
+    box-shadow: 0 10px 20px rgba(245,158,11,0.35);
+  }
+
+  .dish-image {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    border-bottom: 1px solid #fbbf24;
+  }
+
+  .dish-content {
+    padding: 16px 20px;
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .dish-name {
+    font-weight: 600;
+    font-size: 1.2rem;
+    margin-bottom: 6px;
+  }
+  .dish-desc {
+    font-size: 0.9rem;
+    color: #475569;
+    margin-bottom: 14px;
+    min-height: 42px;
+  }
+
+  .dish-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .dish-price {
+    font-weight: 600;
+    color: #b45309;
+    font-size: 1.1rem;
+  }
+
+  button.add-btn, button.remove-btn {
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+    height: 40px;
+    width: 40px;
+  }
+  button.add-btn {
+    background: #f59e0b;
+    color: white;
+  }
+  button.add-btn:hover { background: #b45309; }
+  button.add-btn:disabled { background: #fbbf24; cursor: not-allowed; }
+
+  button.remove-btn {
+    background: #ef4444;
+    color: white;
+  }
+  button.remove-btn:hover { background: #b91c1c; }
+
+  .cart-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(251 191 36 / 0.95);
+    backdrop-filter: saturate(180%) blur(12px);
+    box-shadow: 0 -4px 12px rgba(180, 83, 9, 0.38);
+    padding: 12px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 200;
+    border-radius: 16px 16px 0 0;
+    min-height: 60px;
+  }
+  .cart-summary {
+    font-weight: 600;
+    color: #7c2d12;
+    font-size: 1.1rem;
+  }
+  button.place-order-btn {
+    background: #b45309;
+    color: white;
+    font-weight: 700;
+    padding: 12px 20px;
+    border-radius: 14px;
+    border: none;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  button.place-order-btn:hover:not(:disabled) {
+    background: #78350f;
+  }
+  button.place-order-btn:disabled {
+    background: #fbbf24;
+    cursor: not-allowed;
+  }
+
+  .quantity-badge {
+    background: #b45309;
+    color: white;
+    border-radius: 12px;
+    padding: 2px 8px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-left: 6px;
+    min-width: 24px;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Warung Dua Putri Menu</h1>
+</header>
+
+<main class="container">
+  <section class="menu"></section>
+</main>
+
+<div class="cart-bar">
+  <div class="cart-summary" id="cart-summary">No items added</div>
+  <button class="place-order-btn" id="place-order-btn" disabled>
+    <span class="material-icons">whatsapp</span>
+    Place Order
+  </button>
+</div>
+
+<script>
+  const dishes = [
+    {
+      id: 'ayam-geprek',
+      name: 'Ayam Geprek',
+      desc: 'Crispy Chicken with Sambal',
+      price: 22000,
+      image: 'images/ayam-geprek.jpg',
+      alt: 'Golden crispy fried chicken with spicy red sambal on white plate'
+    },
+    {
+      id: 'ayam-cabe-ijo',
+      name: 'Ayam Cabe Ijo',
+      desc: 'Chicken with Green Chili',
+      price: 23000,
+      image: 'images/ayam-cabe-ijo.jpg',
+      alt: 'Grilled chicken topped with vibrant green chili sauce served on a plate'
+    },
+    {
+      id: 'ayam-bawang-putih',
+      name: 'Ayam Bawang Putih',
+      desc: 'Garlic Chicken',
+      price: 25000,
+      image: 'images/ayam-bawang-putih.jpg',
+      alt: 'Tender steamed chicken Minang style on white dish with garnish'
+    },
+    {
+      id: 'ayam-bakar',
+      name: 'Ayam Bakar',
+      desc: 'Grilled Chicken',
+      price: 26000,
+      image: 'images/ayam-bakar.jpg',
+      alt: 'Juicy grilled chicken with char marks on rustic wooden plate'
+    },
+    {
+      id: 'ayam-goreng-ketumbar',
+      name: 'Ayam Goreng Ketumbar',
+      desc: 'Fried Chicken',
+      price: 21000,
+      image: 'images/ayam-goreng-ketumbar.jpg',
+      alt: 'Crispy fried chicken with golden crust on a white plate'
+    }
+  ];
+
+  let cart = {};
+
+  function formatPrice(value) {
+    return 'Rp ' + value.toLocaleString('id-ID');
+  }
+
+  const menuContainer = document.querySelector('.menu');
+  function renderMenu() {
+    menuContainer.innerHTML = '';
+    dishes.forEach(dish => {
+      const card = document.createElement('article');
+      card.className = 'dish-card';
+      card.tabIndex = 0;
+
+      card.innerHTML = `
+        <img src="${dish.image}" alt="${dish.alt}" class="dish-image" loading="lazy" width="400" height="300" />
+        <div class="dish-content">
+          <h3 class="dish-name">${dish.name}</h3>
+          <p class="dish-desc">${dish.desc}</p>
+          <div class="dish-footer">
+            <div class="dish-price">${formatPrice(dish.price)}</div>
+            <div style="display:flex; gap:6px;">
+              <button class="remove-btn" data-id="${dish.id}" title="Kurangi"><span class="material-icons">remove</span></button>
+              <button class="add-btn" aria-pressed="false" data-id="${dish.id}" title="Tambah">
+                <span class="material-icons">add</span>
+                <span class="quantity-badge" style="display:none;">0</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+      menuContainer.appendChild(card);
+    });
+  }
+
+  const cartSummaryEl = document.getElementById('cart-summary');
+  const placeOrderBtn = document.getElementById('place-order-btn');
+
+  function updateCartUI() {
+    const entries = Object.entries(cart);
+    if (entries.length === 0) {
+      cartSummaryEl.textContent = 'No items added';
+      placeOrderBtn.disabled = true;
+    } else {
+      let summaryParts = [];
+      let total = 0;
+      entries.forEach(([id, qty]) => {
+        const dish = dishes.find(d => d.id === id);
+        if (dish && qty > 0) {
+          const subTotal = dish.price * qty;
+          total += subTotal;
+          summaryParts.push(`${dish.name} ×${qty}`);
+        }
+      });
+      cartSummaryEl.textContent = summaryParts.join(', ') + ` — Total: ${formatPrice(total)}`;
+      placeOrderBtn.disabled = false;
+    }
+
+    document.querySelectorAll('button.add-btn').forEach(btn => {
+      const id = btn.getAttribute('data-id');
+      const qty = cart[id] || 0;
+      const badge = btn.querySelector('.quantity-badge');
+      if (qty > 0) {
+        badge.style.display = 'inline-block';
+        badge.textContent = qty;
+      } else {
+        badge.style.display = 'none';
+      }
+    });
+  }
+
+  menuContainer.addEventListener('click', e => {
+    const addBtn = e.target.closest('button.add-btn');
+    const removeBtn = e.target.closest('button.remove-btn');
+
+    if (addBtn) {
+      const id = addBtn.getAttribute('data-id');
+      cart[id] = (cart[id] || 0) + 1;
+      updateCartUI();
+    }
+
+    if (removeBtn) {
+      const id = removeBtn.getAttribute('data-id');
+      if (cart[id]) {
+        cart[id]--;
+        if (cart[id] <= 0) delete cart[id];
+        updateCartUI();
+      }
+    }
+  });
+
+  placeOrderBtn.addEventListener('click', () => {
+    const entries = Object.entries(cart).filter(([_, qty]) => qty > 0);
+    if (entries.length === 0) return;
+
+    let message = 'Hello,%0AI would like to place an order:%0A';
+    let total = 0;
+    entries.forEach(([id, qty]) => {
+      const dish = dishes.find(d => d.id === id);
+      if (dish) {
+        const price = dish.price * qty;
+        total += price;
+        message += `- ${dish.name} ×${qty} : Rp ${price.toLocaleString('id-ID')}%0A`;
+      }
+    });
+    message += `%0ATotal: Rp ${total.toLocaleString('id-ID')}%0A%0AThank you!`;
+
+    const phoneNumber = '6281274647170';
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
+    window.open(whatsappUrl, '_blank', 'noopener');
+  });
+
+  renderMenu();
+  updateCartUI();
+</script>
+
+</body>
+</html>
