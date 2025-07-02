@@ -349,7 +349,7 @@
     const entries = Object.entries(cart).filter(([_, qty]) => qty > 0);
     if (entries.length === 0) return;
 
-    let message = 'Hello,%0AI would like to place an order:%0A';
+    let message = 'Halo,%0ASaya ingin memesan:%0A';
     let total = 0;
     entries.forEach(([id, qty]) => {
       const dish = dishes.find(d => d.id === id);
